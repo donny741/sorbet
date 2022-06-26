@@ -510,7 +510,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                                   KnowledgeFilter &knowledgeFilter) {
     if (!send->fun.isUpdateKnowledgeName()) {
         // We short circuit here (1) for an honestly negligible performance improvement, but
-        // importantly (2) so that if a new method is added to this list, you'll be forced to add it
+        // importantly (2) so that if a new method is added to this method, you'll be forced to add it
         // to the above list, as that list of names is special more than just inside this method.
         return;
     }
