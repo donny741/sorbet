@@ -1005,13 +1005,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             continue;
                         }
 
-                        if (ctx.state.suggestUnsafe.has_value()) {
-                            // We're running for the purpose doing a `T.unsafe` codemod.
-                            // Don't attempt to be clever with error messages and autocorrects.
-                            ctx.state._error(std::move(err));
-                            continue;
-                        }
-
                         auto &parentRecv = parentUpdateKnowledgeReceiver.value();
                         auto recvLoc = ctx.locAt(send.receiverLoc);
                         auto parentRecvLoc = ctx.locAt(parentRecv.loc);
@@ -1032,6 +1025,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             for (auto section : err->sections) {
                                 if (!absl::StartsWith(section.header, "Autocorrect") &&
                                     !absl::StartsWith(section.header, "Did you mean")) {
+                                    // Calling addAutocorrect below recreates the sections that go with autocorrects
                                     e.addErrorSection(std::move(section));
                                 }
                             }

@@ -295,8 +295,6 @@ string CFG::showRaw(core::Context ctx) const {
 namespace {
 const cfg::Send *looksLikeUpdateKnowledgeSend(const cfg::CFG &inWhat, const cfg::Binding &bind, LocalRef expectedRecv) {
     if (bind.bind.variable != expectedRecv) {
-        // Conservative heuristic, maybe we can make this smarter
-        // (Currently, only detect cases where the branch condition was the last thing computed)
         return nullptr;
     }
 
@@ -307,9 +305,9 @@ const cfg::Send *looksLikeUpdateKnowledgeSend(const cfg::CFG &inWhat, const cfg:
 
     if (!send->recv.variable.isSyntheticTemporary(inWhat)) {
         // Conservative heuristic. If the receiver is not synthetic, then the update knowledge
-        // method was not computed by some sub expression but instead called on a Ruby-level
-        // variable. Therefore it wouldn't be useful to report a "maybe factor this to a variable"
-        // error for this call site.
+        // method was not computed by some sub expression but instead called directly on a
+        // Ruby-level variable. Therefore it wouldn't be useful to report a "maybe factor this to a
+        // variable" error for this call site.
         return nullptr;
     }
 
@@ -326,14 +324,18 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
     if (this->exprs.empty()) {
         return nullopt;
     }
-    auto send = looksLikeUpdateKnowledgeSend(inWhat, this->exprs.back(), this->bexit.cond.variable);
+
+    // Conservative heuristic, maybe we can make this smarter
+    // (Currently, only detect cases where the branch condition was the last thing computed)
+    auto &lastBinding = this->exprs.back();
+    auto send = looksLikeUpdateKnowledgeSend(inWhat, lastBinding, this->bexit.cond.variable);
     if (send == nullptr) {
         return nullopt;
     }
 
     if (send->fun == core::Names::bang() && this->exprs.size() >= 2) {
         // Heuristic, because it's overwhelmingly common to see `!x.foo.nil?`, in which case the
-        // relevent receiver is the one from the second-last, not the last, send binding.
+        // relevent receiver is the second-last, not the last, send binding.
         auto bangRecv = send->recv.variable;
         auto &secondLastBinding = this->exprs[this->exprs.size() - 2];
         auto secondLastSend = looksLikeUpdateKnowledgeSend(inWhat, secondLastBinding, bangRecv);
@@ -343,7 +345,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
         }
     }
 
-    // Cestructor is deleted, have to manually make a shallow copy
+    // Constructor is deleted, have to manually make a shallow copy
     auto recv = VariableUseSite{send->recv.variable, send->recv.type};
     return make_optional<BlockExitCondInfo>(move(recv), send->receiverLoc, send->fun);
 }
