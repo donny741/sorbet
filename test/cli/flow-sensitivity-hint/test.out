@@ -1,0 +1,164 @@
+test/cli/flow-sensitivity-hint/test.rb:9: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+     9 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:9:
+     9 |    x.first.even?
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:9: Replace with `T.must(x.first)`
+     9 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:17: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    17 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:17:
+    17 |    x.first.even?
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:17: Replace with `T.must(x.first)`
+    17 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:23: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    23 |  x[0].even? if !x[0].nil?
+               ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:23:
+    23 |  x[0].even? if !x[0].nil?
+          ^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:23: Replace with `T.must(x[0])`
+    23 |  x[0].even? if !x[0].nil?
+          ^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:31: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    31 |  x.first.even?
+                  ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:31:
+    31 |  x.first.even?
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:31: Replace with `T.must(x.first)`
+    31 |  x.first.even?
+          ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:36: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    36 |  first_is_even = !x.first.nil? && x.first.even?
+                                                   ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:36:
+    36 |  first_is_even = !x.first.nil? && x.first.even?
+                                           ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:36: Replace with `T.must(x.first)`
+    36 |  first_is_even = !x.first.nil? && x.first.even?
+                                           ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:47: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    47 |    looks_like_var_but_is_method.even?
+                                         ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:47:
+    47 |    looks_like_var_but_is_method.even?
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:47: Replace with `T.must(looks_like_var_but_is_method)`
+    47 |    looks_like_var_but_is_method.even?
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:59: Method `sqrt` does not exist on `Class` https://srb.help/7003
+    59 |    returns_class.sqrt(4)
+                          ^^^^
+  Got `Class` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:59:
+    59 |    returns_class.sqrt(4)
+            ^^^^^^^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:65: Revealed type: `String("----- Below tests should not have special messages ---------------------------------------------")` https://srb.help/7014
+    65 |  T.reveal_type("----- Below tests should not have special messages ---------------------------------------------")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `String("----- Below tests should not have special messages ---------------------------------------------")` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:65:
+    65 |  T.reveal_type("----- Below tests should not have special messages ---------------------------------------------")
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:72: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    72 |    y.even?
+              ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:71:
+    71 |    y = T.let(nil, T.nilable(Integer))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:72: Replace with `T.must(y)`
+    72 |    y.even?
+            ^
+
+test/cli/flow-sensitivity-hint/test.rb:84: Method `even?` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
+    84 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:84:
+    84 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:84: Method `even?` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    84 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:84:
+    84 |    x.first.even?
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:84: Replace with `T.must(x.first)`
+    84 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:96: Method `even?` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
+    96 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:96:
+    96 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:96: Method `even?` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    96 |    x.first.even?
+                    ^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:96:
+    96 |    x.first.even?
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:96: Replace with `T.must(x.first)`
+    96 |    x.first.even?
+            ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:108: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+     108 |    x.first.even?
+                      ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:108:
+     108 |    x.first.even?
+              ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:108: Replace with `T.must(x.first)`
+     108 |    x.first.even?
+              ^^^^^^^
+
+test/cli/flow-sensitivity-hint/test.rb:117: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+     117 |    x.first.even?
+                      ^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/flow-sensitivity-hint/test.rb:117:
+     117 |    x.first.even?
+              ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/flow-sensitivity-hint/test.rb:117: Replace with `T.must(x.first)`
+     117 |    x.first.even?
+              ^^^^^^^
+Errors: 15
