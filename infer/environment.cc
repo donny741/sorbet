@@ -1033,16 +1033,20 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             e.addErrorSection(core::ErrorSection(
                                 "Possible misuse of flow-sensitive typing:",
                                 {
-                                    core::ErrorLine::from(parentRecvLoc,
-                                                          "This condition calls `{}` on another method, not a variable",
-                                                          parentRecv.fun.show(ctx)),
+                                    core::ErrorLine::from(
+                                        parentRecvLoc, "The preceding condition calls `{}` on a method, not a variable",
+                                        parentRecv.fun.show(ctx)),
                                     core::ErrorLine::fromWithoutLoc(
                                         "Sorbet only tracks flow-sensitive knowledge on variables, not methods."),
                                     core::ErrorLine::fromWithoutLoc(
                                         "See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity"),
-                                    core::ErrorLine::fromWithoutLoc("To fix, refactor so the `{}` check is on a "
-                                                                    "variable, and use that variable everywhere",
-                                                                    parentRecv.fun.show(ctx)),
+                                    core::ErrorLine::fromWithoutLoc(
+                                        "To fix, refactor so the `{}` call is on a variable and use that variable "
+                                        "everywhere{}",
+                                        parentRecv.fun.show(ctx),
+                                        err->autocorrects.empty()
+                                            ? "."
+                                            : ",\n    or accept the autocorrect to silence this error."),
                                 }));
 
                             // It would be nice to report an autocorrect suggestion to factor out a

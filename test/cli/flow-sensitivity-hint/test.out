@@ -6,12 +6,13 @@ test/cli/flow-sensitivity-hint/test.rb:9: Method `even?` does not exist on `NilC
      9 |    x.first.even?
             ^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:8: This condition calls `nil?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:8: The preceding condition calls `nil?` on a method, not a variable
      8 |  unless x.first.nil?
                  ^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `nil?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `nil?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:9: Replace with `T.must(x.first)`
      9 |    x.first.even?
@@ -25,12 +26,13 @@ test/cli/flow-sensitivity-hint/test.rb:17: Method `even?` does not exist on `Nil
     17 |    x.first.even?
             ^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:16: This condition calls `is_a?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:16: The preceding condition calls `is_a?` on a method, not a variable
     16 |  if x.first.is_a?(Integer)
              ^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `is_a?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `is_a?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:17: Replace with `T.must(x.first)`
     17 |    x.first.even?
@@ -44,12 +46,13 @@ test/cli/flow-sensitivity-hint/test.rb:23: Method `even?` does not exist on `Nil
     23 |  x[0].even? if !x[0].nil?
           ^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:23: This condition calls `nil?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:23: The preceding condition calls `nil?` on a method, not a variable
     23 |  x[0].even? if !x[0].nil?
                          ^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `nil?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `nil?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:23: Replace with `T.must(x[0])`
     23 |  x[0].even? if !x[0].nil?
@@ -63,12 +66,13 @@ test/cli/flow-sensitivity-hint/test.rb:31: Method `even?` does not exist on `Nil
     31 |  x.first.even?
           ^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:29: This condition calls `nil?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:29: The preceding condition calls `nil?` on a method, not a variable
     29 |  return false if x.first.nil?
                           ^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `nil?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `nil?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:31: Replace with `T.must(x.first)`
     31 |  x.first.even?
@@ -82,12 +86,13 @@ test/cli/flow-sensitivity-hint/test.rb:36: Method `even?` does not exist on `Nil
     36 |  first_is_even = !x.first.nil? && x.first.even?
                                            ^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:36: This condition calls `nil?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:36: The preceding condition calls `nil?` on a method, not a variable
     36 |  first_is_even = !x.first.nil? && x.first.even?
                            ^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `nil?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `nil?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:36: Replace with `T.must(x.first)`
     36 |  first_is_even = !x.first.nil? && x.first.even?
@@ -101,12 +106,13 @@ test/cli/flow-sensitivity-hint/test.rb:47: Method `even?` does not exist on `Nil
     47 |    looks_like_var_but_is_method.even?
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:46: This condition calls `nil?` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:46: The preceding condition calls `nil?` on a method, not a variable
     46 |  if !looks_like_var_but_is_method.nil?
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `nil?` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `nil?` call is on a variable and use that variable everywhere,
+    or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     test/cli/flow-sensitivity-hint/test.rb:47: Replace with `T.must(looks_like_var_but_is_method)`
     47 |    looks_like_var_but_is_method.even?
@@ -120,12 +126,12 @@ test/cli/flow-sensitivity-hint/test.rb:59: Method `sqrt` does not exist on `Clas
     59 |    returns_class.sqrt(4)
             ^^^^^^^^^^^^^
   Possible misuse of flow-sensitive typing:
-    test/cli/flow-sensitivity-hint/test.rb:58: This condition calls `<` on another method, not a variable
+    test/cli/flow-sensitivity-hint/test.rb:58: The preceding condition calls `<` on a method, not a variable
     58 |  if returns_class < Integer
              ^^^^^^^^^^^^^
     Sorbet only tracks flow-sensitive knowledge on variables, not methods.
     See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity
-    To fix, refactor so the `<` check is on a variable, and use that variable everywhere
+    To fix, refactor so the `<` call is on a variable and use that variable everywhere.
 
 test/cli/flow-sensitivity-hint/test.rb:65: Revealed type: `String("----- Below tests should not have special messages ---------------------------------------------")` https://srb.help/7014
     65 |  T.reveal_type("----- Below tests should not have special messages ---------------------------------------------")
