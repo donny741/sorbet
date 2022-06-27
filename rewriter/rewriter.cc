@@ -14,6 +14,7 @@
 #include "rewriter/Flatfiles.h"
 #include "rewriter/Flatten.h"
 #include "rewriter/Initializer.h"
+#include "rewriter/InteractorInitializer.h"
 #include "rewriter/InterfaceWrapper.h"
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
@@ -53,6 +54,7 @@ public:
         Singleton::run(ctx, classDef);
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
+        InteractorInitializer::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);

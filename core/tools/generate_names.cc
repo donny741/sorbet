@@ -184,6 +184,13 @@ NameDef names[] = {
     {"field"},
     {"pattern"},
 
+    // InteractorInitializer methods
+    {"initializeWith", "initialize_with"},
+    {"initializeWithKeywordParams", "initialize_with_keyword_params"},
+    {"for_", "for"},
+    {"with"},
+    {"run"},
+
     // type alias names
     {"typeAlias", "type_alias"},
     {"typeMember", "type_member"},
