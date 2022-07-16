@@ -14,6 +14,36 @@ namespace sorbet::rewriter {
 
 namespace {
 
+bool isIncludeInteractorInitializer(const ast::Send *send) {
+    if (!send->recv.isSelfReference()) {
+        return false;
+    }
+
+    if (send->fun != core::Names::include()) {
+        return false;
+    }
+
+    if (send->numPosArgs() != 1 || send->hasKwArgs()) {
+        return false;
+    }
+
+    auto *sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
+    if (sym == nullptr || sym->cnst != core::Names::Constants::Initializer()) {
+        return false;
+    }
+
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope);
+    if (scope == nullptr) {
+        return false;
+    }
+
+    if (scope->cnst != core::Names::Constants::Interactor()) {
+        return false;
+    }
+
+    return ast::MK::isRootScope(scope->scope);
+}
+
 pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::ExpressionPtr &name) {
     core::LocOffsets loc;
     core::NameRef res;
@@ -53,38 +83,6 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
     }
 }
 
-ast::ExpressionPtr parsePropType(core::NameRef name, ast::Send *sig) {
-    const auto empty = nullptr;
-
-    if (sig == nullptr) {
-        return empty;
-    }
-
-    auto *block = sig->block();
-    auto *body = ast::cast_tree<ast::Send>(block->body);
-    auto *cur = body;
-    while (cur != nullptr) {
-        if (cur->fun == core::Names::params()) {
-            auto numKwArgs = cur->numKwArgs();
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto &arg = cur->getKwKey(i);
-
-                if (auto *lit = ast::cast_tree<ast::Literal>(arg)) {
-                    if (lit->isSymbol()) {
-                        core::NameRef typeName = lit->asSymbol();
-                        // check if symbol
-                        if (typeName == name) {
-                            return ASTUtil::dupType(cur->getKwValue(i));
-                        }
-                    }
-                }
-            }
-        }
-        cur = ast::cast_tree<ast::Send>(cur->recv);
-    }
-    return empty;
-}
-
 struct ArgInfo {
     core::NameRef name;
     core::NameRef varName;
@@ -92,42 +90,6 @@ struct ArgInfo {
     core::LocOffsets loc;
     ast::ExpressionPtr type;
 };
-
-// bool isT(const ast::ExpressionPtr &expr) {
-//     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-//     return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
-// }
-
-// bool isTNilable(const ast::ExpressionPtr &expr) {
-//     auto *nilable = ast::cast_tree<ast::Send>(expr);
-//     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
-// }
-
-// bool isTUntyped(const ast::ExpressionPtr &expr) {
-//     auto *send = ast::cast_tree<ast::Send>(expr);
-//     return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
-// }
-
-ArgInfo parseProp(core::MutableContext ctx, ast::ExpressionPtr &prop, ast::Send *sig) {
-    ArgInfo ret;
-
-    auto [name, argLoc] = getName(ctx, prop);
-    if (!name.exists()) {
-        return ret;
-    }
-    ret.loc = argLoc;
-    ret.name = name;
-    ret.varName = name.addAt(ctx);
-    ret.setName = name.addEq(ctx);
-    ret.type = parsePropType(name, sig);
-
-    // Seems to be not needed. Maybe make reader methods returns nilable?
-    // if (ret.type != nullptr && !isTNilable(ret.type) && !isTUntyped(ret.type)) {
-    //     ret.type = ast::MK::Nilable(ret.loc, std::move(ret.type));
-    // }
-
-    return ret;
-}
 
 ast::ExpressionPtr mkTypedInitialize(core::LocOffsets loc, vector<ArgInfo> *props) {
     ast::MethodDef::ARGS_store args;
@@ -161,10 +123,12 @@ vector<ast::ExpressionPtr> mkClassMethods(core::LocOffsets loc, vector<ArgInfo> 
             sigArgs.emplace_back(prop.type.deepCopy());
         }
     }
-    if (returnType != nullptr) {
-        sig = ast::MK::Sig(loc, std::move(sigArgs), returnType.deepCopy());
-    } else {
-        sig = ast::MK::SigVoid(loc, std::move(sigArgs));
+    if (!empty(sigArgs)) {
+        if (returnType != nullptr) {
+            sig = ast::MK::Sig(loc, std::move(sigArgs), returnType.deepCopy());
+        } else {
+            sig = ast::MK::SigVoid(loc, std::move(sigArgs));
+        }
     }
 
     for (auto method : methods) {
@@ -181,7 +145,9 @@ vector<ast::ExpressionPtr> mkClassMethods(core::LocOffsets loc, vector<ArgInfo> 
         ast::MethodDef::Flags flags;
         flags.isSelfMethod = true;
 
-        result.insert(result.end(), sig.deepCopy());
+        if (sig != nullptr) {
+            result.insert(result.end(), sig.deepCopy());
+        }
         result.insert(result.end(),
                       ast::MK::SyntheticMethod(loc, loc, method, std::move(args), std::move(runCall), flags));
     }
@@ -189,7 +155,10 @@ vector<ast::ExpressionPtr> mkClassMethods(core::LocOffsets loc, vector<ArgInfo> 
     return result;
 }
 
-ast::ExpressionPtr resolveReturnType(ast::ClassDef *classDef) {
+pair<bool, ast::ExpressionPtr> findRunMethodAndType(ast::ClassDef *classDef) {
+    bool isRunMethodPresent = false;
+    ast::ExpressionPtr runMethodType;
+
     ast::ExpressionPtr *prevStat = nullptr;
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceStats;
 
@@ -201,7 +170,7 @@ ast::ExpressionPtr resolveReturnType(ast::ClassDef *classDef) {
             continue;
         }
 
-        // Found `#run`, resolving type from its sig
+        isRunMethodPresent = true;
         auto sig = ASTUtil::castSig(*prevStat);
         if (sig == nullptr) {
             // Method has no valid sig
@@ -221,15 +190,64 @@ ast::ExpressionPtr resolveReturnType(ast::ClassDef *classDef) {
                 break;
             }
 
-            return ASTUtil::dupType(body->getPosArg(0));
+            runMethodType = ASTUtil::dupType(body->getPosArg(0));
+            break;
         }
     }
 
-    return nullptr;
+    return make_pair(isRunMethodPresent, std::move(runMethodType));
+}
+
+ast::ExpressionPtr parsePropType(core::NameRef name, ast::Send *sig) {
+    const auto empty = nullptr;
+
+    if (sig == nullptr) {
+        return empty;
+    }
+
+    auto *block = sig->block();
+    auto *body = ast::cast_tree<ast::Send>(block->body);
+    auto *cur = body;
+    while (cur != nullptr) {
+        if (cur->fun == core::Names::params()) {
+            auto numKwArgs = cur->numKwArgs();
+            for (auto i = 0; i < numKwArgs; ++i) {
+                auto &arg = cur->getKwKey(i);
+
+                if (auto *lit = ast::cast_tree<ast::Literal>(arg)) {
+                    if (lit->isSymbol()) {
+                        core::NameRef typeName = lit->asSymbol();
+                        // check if symbol
+                        if (typeName == name) {
+                            return ASTUtil::dupType(cur->getKwValue(i));
+                        }
+                    }
+                }
+            }
+        }
+        cur = ast::cast_tree<ast::Send>(cur->recv);
+    }
+    return empty;
+}
+
+ArgInfo parseProp(core::MutableContext ctx, ast::ExpressionPtr &prop, ast::Send *sig) {
+    ArgInfo ret;
+
+    auto [name, argLoc] = getName(ctx, prop);
+    if (!name.exists()) {
+        return ret;
+    }
+    ret.loc = argLoc;
+    ret.name = name;
+    ret.varName = name.addAt(ctx);
+    ret.setName = name.addEq(ctx);
+    ret.type = parsePropType(name, sig);
+
+    return ret;
 }
 
 vector<ast::ExpressionPtr> parseInitializerStatement(core::MutableContext ctx, ast::Send *send, ast::Send *sig,
-                                                     ast::ExpressionPtr returnType) {
+                                                     bool isRunMethodPresent, ast::ExpressionPtr returnType) {
     vector<ast::ExpressionPtr> stats;
     const auto numPosArgs = send->numPosArgs();
     vector<ArgInfo> props;
@@ -264,9 +282,11 @@ vector<ast::ExpressionPtr> parseInitializerStatement(core::MutableContext ctx, a
         props.emplace_back(std::move(prop));
     }
 
-    auto classMethods = mkClassMethods(loc, &props, std::move(returnType));
+    if (isRunMethodPresent) {
+        auto classMethods = mkClassMethods(loc, &props, std::move(returnType));
+        std::move(classMethods.begin(), classMethods.end(), std::back_inserter(stats));
+    }
 
-    std::move(classMethods.begin(), classMethods.end(), std::back_inserter(stats));
     stats.insert(stats.begin(), mkTypedInitialize(loc, &props));
     if (sig != nullptr) {
         stats.insert(stats.begin(), sig->deepCopy());
@@ -278,6 +298,7 @@ vector<ast::ExpressionPtr> parseInitializerStatement(core::MutableContext ctx, a
 } // namespace
 
 void InteractorInitializer::run(core::MutableContext ctx, ast::ClassDef *classDef) {
+    bool hasInitializerIncluded = false;
     ast::ExpressionPtr *prevStat = nullptr;
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceStats;
     uint16_t numReplacements;
@@ -288,6 +309,11 @@ void InteractorInitializer::run(core::MutableContext ctx, ast::ClassDef *classDe
             continue;
         }
 
+        if (isIncludeInteractorInitializer(send)) {
+            hasInitializerIncluded = true;
+        }
+
+        // TODO: Support `initialize_with_keyword_params` method
         if (send->fun == core::Names::initializeWith()) {
             vector<ast::ExpressionPtr> empty;
 
@@ -299,16 +325,20 @@ void InteractorInitializer::run(core::MutableContext ctx, ast::ClassDef *classDe
                 }
             }
 
-            auto returnType = resolveReturnType(classDef);
-            auto stats = parseInitializerStatement(ctx, send, sig, std::move(returnType));
+            auto [isRunMethodPresent, returnType] = findRunMethodAndType(classDef);
+            auto stats = parseInitializerStatement(ctx, send, sig, isRunMethodPresent, std::move(returnType));
             numReplacements = stats.size();
             replaceStats[stat.get()] = std::move(stats);
-            if (prevStat != nullptr) {
+            if (sig != nullptr) {
                 replaceStats[prevStat->get()] = std::move(empty);
             }
             break;
         }
         prevStat = &stat;
+    }
+
+    if (!hasInitializerIncluded) {
+        return;
     }
 
     // this is cargo-culted from Prop.cc.

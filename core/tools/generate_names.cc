@@ -185,6 +185,8 @@ NameDef names[] = {
     {"pattern"},
 
     // InteractorInitializer methods
+    {"Interactor", "Interactor", true},
+    {"Initializer", "Initializer", true},
     {"initializeWith", "initialize_with"},
     {"initializeWithKeywordParams", "initialize_with_keyword_params"},
     {"for_", "for"},
