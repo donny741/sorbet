@@ -10,8 +10,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Mount bazel cache
+      uses: actions/cache@v3
+      with:
+        path: "~/.cache/bazel"
+        key: bazel
+
     - name: Build Sorbet
       run: ./bazel build //main:sorbet --config=release-linux
 
     - name: Test Sorbet
-      run: ./bazel test //main:sorbet
+      run: ./bazel test test
