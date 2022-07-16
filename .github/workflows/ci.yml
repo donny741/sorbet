@@ -11,4 +11,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build Sorbet
-      run: ./bazel build //main:sorbet
+      run: ./bazel build //main:sorbet --config=release-linux
+
+    - name: Test Sorbet
+      run: ./bazel test //main:sorbet
